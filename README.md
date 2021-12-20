@@ -7,9 +7,12 @@ Examples on how to use Julia in Python.
 ### Installation
 
 - If using a python virtual environment, do this before following further steps:
+    Activate the environment
+    
+Set the environment variable `PYCALL_JL_RUNTIME_PYTHON` and `PYTHON` to the path of the `python` executable (set it to env executable if environment is activated).  
+For more info, see [PyCall.jl](https://github.com/JuliaPy/PyCall.jl).
 
-    Activate the environment, and set the environment variable `PYCALL_JL_RUNTIME_PYTHON` to the path of the `python` executable.  
-    For more info, see [PyCall.jl](https://github.com/JuliaPy/PyCall.jl).
+Note that these steps will have to be repeated again or each different environment.
 
 
 1. Install [Julia](https://julialang.org/downloads/) for your OS.
@@ -25,31 +28,48 @@ Examples on how to use Julia in Python.
     julia.install()
     ```
 
+4. Just to be sure, rebuild the package in Julia by opening the Julia REPL:
+    ```julia
+    using Pkg
+    Pkg.build("PyCall")
+    ```
+
+To test if the installation works, run `from julia import Main` in a python REPL.  
+If an error is returned, delete/remove everything and follow these steps again.
+
+Remove python `julia` package using `python3 -m pip uninstall julia`, and remove julia `PyCall` package using `rm PyCall` by starting `julia` and entering package manager by typing `]`.
+
 ### Usage
 
 Run the following lines of code in a REPL or add them to your code file:
 
 ```python
-from julia.api import Julia
+from julia.api import Julia  # these two lines take a long time to execute
 from julia import Main
 
 jl = Julia(compiled_modules=False)
 
-test_jl = jl.eval('include("test.jl")')
+# run any one of the following two lines
+jl.eval('include("test.jl")')
+Main.include("test.jl")
 ```
 
 ### Useful Information
 
 `Julia` is the object representing julia.  
-`Main` is the default Julia namespace (used to define variables etc.).  
+`Main` is the default Julia namespace (used to define and access variables, functions etc.).  
 `jl.eval(...)` is used to execute Julia. `include("test.jl")` is used in Julia to include `test.jl` file.
 
 To pass on your variables to the Julia namespace, define them like:
 ```python
 Main.var_in_julia = var_in_python
 ```
-To execute a function or method defined in the .jl file, use `jl.eval('...')`, replacing '...' with the Julia code.  
-You can now use the variable `var_in_julia` inside your Julia code.
+You can now use the variable `var_in_julia` inside your Julia code.  
+To execute a function or method defined in the .jl file, use either:
+
+1. `jl.eval('my_func(var_in_julia)')` - to run it in the julia namespace using its defined objects.
+2. `Main.my_func(var_in_python)` - to run it by directly accessing it in python.
+
 
 - In Julia, the `Pkg` package is used to add new packages, remove packages, create packages, activate environments etc.  
   Add new packages using:  
